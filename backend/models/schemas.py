@@ -31,6 +31,7 @@ class QuizRequest(BaseModel):
 
 class Question(BaseModel):
     question: str
+    answer: str
     difficulty: str
     topic: str
 

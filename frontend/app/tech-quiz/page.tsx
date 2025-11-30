@@ -133,7 +133,19 @@ export default function TechQuiz() {
                                         </span>
                                     </div>
                                 </div>
-                                <p className="text-gray-700">{q.question}</p>
+                                <p className="text-gray-700 mb-4">{q.question}</p>
+                                <details className="group">
+                                    <summary className="flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-700 font-medium select-none">
+                                        <span>Show Answer</span>
+                                        <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </summary>
+                                    <div className="mt-3 p-4 bg-blue-50 rounded-lg text-gray-800 border border-blue-100">
+                                        <span className="font-semibold block mb-1">Answer:</span>
+                                        {q.answer}
+                                    </div>
+                                </details>
                             </div>
                         ))}
                     </div>

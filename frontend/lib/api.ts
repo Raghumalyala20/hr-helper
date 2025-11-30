@@ -27,6 +27,7 @@ export interface QuizRequest {
 
 export interface Question {
     question: string;
+    answer: string;
     difficulty: string;
     topic: string;
 }

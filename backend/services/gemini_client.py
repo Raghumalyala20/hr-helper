@@ -103,19 +103,22 @@ Provide your analysis in the following JSON format:
                 "recommendation": response
             }
     
+        
     async def generate_tech_questions(self, role: str, skill_level: str, num_questions: int = 5) -> list:
         """Generate technical assessment questions"""
         prompt = f"""Generate {num_questions} technical interview questions for a {role} position at {skill_level} level.
 
 For each question, provide:
 1. The question itself
-2. Difficulty level (easy/medium/hard)
-3. Topic/skill being tested
+2. The correct answer (concise explanation)
+3. Difficulty level (easy/medium/hard)
+4. Topic/skill being tested
 
 Format as JSON array:
 [
     {{
         "question": "question text",
+        "answer": "answer text",
         "difficulty": "easy/medium/hard",
         "topic": "topic name"
     }},
@@ -147,6 +150,7 @@ Make questions practical, relevant, and appropriate for the skill level."""
             return [
                 {
                     "question": "Unable to generate questions. Please try again.",
+                    "answer": "N/A",
                     "difficulty": "medium",
                     "topic": "General"
                 }
