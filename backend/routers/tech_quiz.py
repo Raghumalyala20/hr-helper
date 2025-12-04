@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from models.schemas import QuizRequest, QuizResponse, Question
+from models.schemas import QuizRequest, QuizResponse, Question, QuizEvaluationRequest, QuizEvaluationResponse
 from services.gemini_client import gemini_client
 
 router = APIRouter()
@@ -16,5 +16,16 @@ async def generate_quiz(request: QuizRequest):
         
         questions = [Question(**q) for q in questions_data]
         return QuizResponse(questions=questions)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/evaluate", response_model=QuizEvaluationResponse)
+async def evaluate_quiz(request: QuizEvaluationRequest):
+    """Evaluate quiz answers"""
+    try:
+        result = await gemini_client.evaluate_quiz(
+            answers=[a.dict() for a in request.answers]
+        )
+        return QuizEvaluationResponse(**result)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

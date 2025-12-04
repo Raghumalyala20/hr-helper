@@ -60,7 +60,9 @@ Make it professional, unbiased, and attractive to candidates. Format it in a cle
 1. A match score (0-100) based on skills, experience, and qualifications
 2. Top 3-5 strengths (what makes this candidate a good fit)
 3. Top 3-5 gaps (what's missing or weak)
-4. A brief recommendation (hire/interview/reject with reasoning)
+4. Confidence Level (High/Medium/Low) based on writing style/tone
+5. Brief confidence analysis (why you assigned that level)
+6. A brief recommendation (hire/interview/reject with reasoning)
 
 Job Description:
 {jd_text}
@@ -73,6 +75,8 @@ Provide your analysis in the following JSON format:
     "match_score": <number 0-100>,
     "strengths": ["strength1", "strength2", ...],
     "gaps": ["gap1", "gap2", ...],
+    "confidence_level": "High/Medium/Low",
+    "confidence_analysis": "analysis text",
     "recommendation": "your recommendation here"
 }}"""
 
@@ -100,6 +104,8 @@ Provide your analysis in the following JSON format:
                 "match_score": 50,
                 "strengths": ["Unable to parse detailed analysis"],
                 "gaps": ["Please review manually"],
+                "confidence_level": "Medium",
+                "confidence_analysis": "Unable to analyze confidence due to parsing error.",
                 "recommendation": response
             }
     
@@ -155,6 +161,104 @@ Make questions practical, relevant, and appropriate for the skill level."""
                     "topic": "General"
                 }
             ]
+
+    async def evaluate_quiz(self, answers: list) -> dict:
+        """Evaluate quiz answers"""
+        answers_text = "\n\n".join([f"Q: {a['question']}\nA: {a['answer']}" for a in answers])
+        
+        prompt = f"""You are a technical interviewer. Evaluate the following candidate answers:
+
+{answers_text}
+
+Provide:
+1. An overall score (0-100)
+2. Confidence Level (High/Medium/Low) based on the answers
+3. Brief feedback on performance
+
+Format as JSON:
+{{
+    "score": <number>,
+    "confidence_level": "High/Medium/Low",
+    "feedback": "feedback text"
+}}"""
+
+        response = await self.generate_content(prompt)
+        
+        # Parse JSON from response
+        import json
+        import re
+        
+        # Extract JSON from markdown code blocks if present
+        json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', response, re.DOTALL)
+        if json_match:
+            json_str = json_match.group(1)
+        else:
+            # Try to find JSON object in the response
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            json_str = json_match.group(0) if json_match else response
+        
+        try:
+            result = json.loads(json_str)
+            return result
+        except json.JSONDecodeError:
+            return {
+                "score": 0,
+                "confidence_level": "Low",
+                "feedback": "Unable to evaluate answers."
+            }
+
+    async def analyze_audio(self, audio_path: str) -> dict:
+        """Analyze audio for confidence and tone"""
+        try:
+            # Upload file to Gemini
+            audio_file = genai.upload_file(audio_path)
+            
+            prompt = """Listen to this interview answer carefully. Analyze the speaker's voice tone, pitch, fluency, and hesitations to assess their confidence.
+
+Provide:
+1. Confidence Score (0-100)
+2. Confidence Level (High/Medium/Low)
+3. Tone Analysis (e.g., "Calm", "Nervous", "Assertive", "Monotone")
+4. A brief summary of what was said
+5. A near-verbatim transcription
+
+Format as JSON:
+{
+    "confidence_score": <number>,
+    "confidence_level": "High/Medium/Low",
+    "tone": "tone description",
+    "summary": "summary text",
+    "transcription": "transcription text"
+}"""
+
+            response = self.model.generate_content([prompt, audio_file])
+            
+            # Clean up - delete the file from Gemini storage (optional but good practice)
+            # genai.delete_file(audio_file.name) 
+            
+            # Parse JSON
+            import json
+            import re
+            
+            text_response = response.text
+            json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', text_response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(1)
+            else:
+                json_match = re.search(r'\{.*\}', text_response, re.DOTALL)
+                json_str = json_match.group(0) if json_match else text_response
+            
+            return json.loads(json_str)
+            
+        except Exception as e:
+            print(f"Error analyzing audio: {e}")
+            return {
+                "confidence_score": 0,
+                "confidence_level": "Low",
+                "tone": "Error analyzing audio",
+                "summary": "N/A",
+                "transcription": "N/A"
+            }
 
 # Singleton instance
 gemini_client = GeminiClient()

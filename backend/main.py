@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import jd_generator, cv_screener, tech_quiz
+from routers import jd_generator, cv_screener, tech_quiz, live_interview
 
 app = FastAPI(
     title="HR Helper API",
@@ -21,6 +21,7 @@ app.add_middleware(
 app.include_router(jd_generator.router, prefix="/api/jd", tags=["Job Description"])
 app.include_router(cv_screener.router, prefix="/api/cv", tags=["CV Screening"])
 app.include_router(tech_quiz.router, prefix="/api/quiz", tags=["Technical Quiz"])
+app.include_router(live_interview.router, prefix="/api/interview", tags=["Live Interview"])
 
 @app.get("/")
 async def root():

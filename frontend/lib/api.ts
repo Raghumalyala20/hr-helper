@@ -16,6 +16,8 @@ export interface CVScreenResponse {
     match_score: number;
     strengths: string[];
     gaps: string[];
+    confidence_level: string;
+    confidence_analysis: string;
     recommendation: string;
 }
 
@@ -79,6 +81,59 @@ export async function generateQuiz(data: QuizRequest): Promise<QuizResponse> {
 
     if (!response.ok) {
         throw new Error('Failed to generate quiz');
+    }
+
+    return response.json();
+}
+
+export interface UserAnswer {
+    question: string;
+    answer: string;
+}
+
+export interface QuizEvaluationRequest {
+    answers: UserAnswer[];
+}
+
+export interface QuizEvaluationResponse {
+    score: number;
+    confidence_level: string;
+    feedback: string;
+}
+
+export async function evaluateQuiz(data: QuizEvaluationRequest): Promise<QuizEvaluationResponse> {
+    const response = await fetch(`${API_BASE_URL}/api/quiz/evaluate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to evaluate quiz');
+    }
+
+    return response.json();
+}
+
+export interface AudioAnalysisResponse {
+    confidence_score: number;
+    confidence_level: string;
+    tone: string;
+    summary: string;
+    transcription: string;
+}
+
+export async function analyzeAudio(audioBlob: Blob): Promise<AudioAnalysisResponse> {
+    const formData = new FormData();
+    formData.append('file', audioBlob, 'recording.webm');
+
+    const response = await fetch(`${API_BASE_URL}/api/interview/analyze-audio`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to analyze audio');
     }
 
     return response.json();

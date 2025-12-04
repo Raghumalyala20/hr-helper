@@ -13,7 +13,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
           {/* JD Generator Card */}
           <Link href="/jd-generator">
             <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer">
@@ -49,6 +49,19 @@ export default function Home() {
               </h2>
               <p className="text-gray-600">
                 Generate technical questions for candidate evaluation
+              </p>
+            </div>
+          </Link>
+
+          {/* Live Interview Card */}
+          <Link href="/live-interview">
+            <div className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow cursor-pointer">
+              <div className="text-4xl mb-4">🎤</div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Live Interview
+              </h2>
+              <p className="text-gray-600">
+                Analyze candidate confidence and tone during live interviews
               </p>
             </div>
           </Link>
